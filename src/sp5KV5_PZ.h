@@ -54,8 +54,8 @@
 
 // DEFINICION DEL TIPO DE SISTEMA
 //----------------------------------------------------------------------------
-#define SP5K_REV "5.0.0"
-#define SP5K_DATE "@ 20160629"
+#define SP5K_REV "5.0.2"
+#define SP5K_DATE "@ 20160725"
 
 #define SP5K_MODELO "sp5KV5_PZ HW:avr1284P R5.0"
 #define SP5K_VERSION "FW:FRTOS8"
@@ -108,12 +108,15 @@ wdgStatus_t wdgStatus;
 xSemaphoreHandle sem_SYSVars;
 #define MSTOTAKESYSVARSSEMPH ((  TickType_t ) 10 )
 typedef enum { WK_IDLE = 0, WK_NORMAL, WK_SERVICE, WK_MONITOR_FRAME, WK_MONITOR_SQE  } t_wrkMode;
-typedef enum { OFF = 0, ON = 1 } t_onOff;
+typedef enum { ON = 0, OFF } t_binary;
+#define RUN ON
+#define STOP OFF
+#define GOOD ON
+#define BAD OFF
+
 typedef enum { D_NONE = 0, D_BASIC = 1, D_DATA = 2, D_GPRS = 4, D_MEM = 8, D_DIGITAL = 16,  D_DEBUG = 32 } t_debug;
 typedef enum { MDM_PRENDIDO = 0, MDM_APAGADO } t_modemStatus;
 typedef enum { modoPWRSAVE_OFF = 0, modoPWRSAVE_ON } t_pwrSave;
-typedef enum { RUN = 0, STOP } t_rangeAction;
-typedef enum { GOOD = 0, BAD } t_rangeQuality;
 //------------------------------------------------------------------------------------
 
 #define NRO_CHANNELS		3
@@ -130,6 +133,7 @@ typedef struct {
 	// size = 7+3*4+4 = 23 bytes
 	RtcTimeType_t rtc;				// 7
 	u16 inputs[NRO_CHANNELS];		// 6
+	u08 status;
 } frameData_t;	//  23 bytes
 
 
@@ -156,6 +160,8 @@ typedef struct {
 	t_wrkMode wrkMode;
 
 	u08 debugLevel;		// Indica que funciones debugear.
+	u08 log;
+
 	u08 gsmBand;
 
 	// Nombre de los canales
@@ -180,7 +186,7 @@ s08 u_loadSystemParams(void);
 void u_loadDefaults(void);
 char *u_now(void);
 void u_reset(void);
-void u_rangeSignal(t_rangeAction action);
+void u_rangeSignal(t_binary action);
 
 char nowStr[32];
 
@@ -192,6 +198,7 @@ s08 u_modemPwrStatus(void);
 s08 u_wrRtc(char *s);
 
 void u_debugPrint(u08 debugCode, char *msg, u16 size);
+void u_logPrint(char *msg, u16 size);
 void pvMCP_init_MCP1(u08 modo);
 
 //------------------------------------------------------------------------------------

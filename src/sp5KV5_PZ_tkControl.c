@@ -23,7 +23,7 @@ void  pv_controlTimerCallBack( TimerHandle_t pxTimer );
 s08 f_controlCallback;
 
 typedef enum { LED_KA = 0, LED_MODEM } t_led;
-void pv_switchLed(t_led led, t_onOff modo);
+void pv_switchLed(t_led led, t_binary modo);
 
 //------------------------------------------------------------------------------------
 void tkControl(void * pvParameters)
@@ -35,7 +35,26 @@ StatBuffer_t pxFFStatBuffer;
 
 	vTaskDelay( ( TickType_t)( 500 / portTICK_RATE_MS ) );
 
-	MCP_init();				// Esto prende la terminal.
+	// Esto prende la terminal.
+	MCP_init();
+
+	// Load systemVars
+	if  ( u_loadSystemParams() == TRUE ) {
+//		snprintf_P( ctl_printfBuff,sizeof(ctl_printfBuff),PSTR("Load config OK.\r\n\0") );
+	} else {
+		u_loadDefaults();
+		u_saveSystemParams();
+//		snprintf_P( ctl_printfBuff,sizeof(ctl_printfBuff),PSTR("Load config ERROR: defaults !!\r\n\0") );
+	}
+	FreeRTOS_write( &pdUART1, ctl_printfBuff, sizeof(ctl_printfBuff) );
+
+	// Configuro el ID en el bluetooth
+	snprintf_P( ctl_printfBuff,sizeof(ctl_printfBuff),PSTR("\r\r\r\r"));
+	FreeRTOS_write( &pdUART1, ctl_printfBuff, sizeof(ctl_printfBuff) );
+	vTaskDelay( ( TickType_t)( 500 / portTICK_RATE_MS ) );
+	snprintf_P( ctl_printfBuff,sizeof(ctl_printfBuff),PSTR("AT+NAME%s\0"),systemVars.dlgId);
+	FreeRTOS_write( &pdUART1, ctl_printfBuff, sizeof(ctl_printfBuff) );
+	vTaskDelay( ( TickType_t)( 2000 / portTICK_RATE_MS ) );
 
 	pv_wdgInit();
 
@@ -46,16 +65,6 @@ StatBuffer_t pxFFStatBuffer;
 		snprintf_P( ctl_printfBuff,sizeof(ctl_printfBuff),PSTR("FSInit ERROR (%d)[%d]\r\n\0"),ffRcd, pxFFStatBuffer.errno);
 	} else {
 		snprintf_P( ctl_printfBuff,sizeof(ctl_printfBuff),PSTR("FSInit OK\r\nMEMsize=%d, wrPtr=%d,rdPtr=%d,delPtr=%d,Free=%d,4del=%d\r\n\0"),FF_MAX_RCDS, pxFFStatBuffer.HEAD,pxFFStatBuffer.RD, pxFFStatBuffer.TAIL,pxFFStatBuffer.rcdsFree,pxFFStatBuffer.rcds4del);
-	}
-	FreeRTOS_write( &pdUART1, ctl_printfBuff, sizeof(ctl_printfBuff) );
-
-	// Load systemVars
-	if  ( u_loadSystemParams() == TRUE ) {
-		snprintf_P( ctl_printfBuff,sizeof(ctl_printfBuff),PSTR("Load config OK.\r\n\0") );
-	} else {
-		u_loadDefaults();
-		u_saveSystemParams();
-		snprintf_P( ctl_printfBuff,sizeof(ctl_printfBuff),PSTR("Load config ERROR: defaults !!\r\n\0") );
 	}
 	FreeRTOS_write( &pdUART1, ctl_printfBuff, sizeof(ctl_printfBuff) );
 
@@ -224,7 +233,7 @@ static u16 l_secCounter = 1800;
 	}
 }
 //------------------------------------------------------------------------------------
-void pv_switchLed(t_led led, t_onOff modo)
+void pv_switchLed(t_led led, t_binary modo)
 {
 static s08 led_KA = OFF;
 static s08 led_MODEM = OFF;

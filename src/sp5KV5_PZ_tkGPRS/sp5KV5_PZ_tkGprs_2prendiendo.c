@@ -121,6 +121,9 @@ static int gTR_B00(void)
 	HWtryes = HW_TRYES;
 	SWtryes = SW_TRYES;
 
+	snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("GPRS: Modem Prendido\r\n\0"));
+	u_logPrint(gprs_printfBuff, sizeof(gprs_printfBuff) );
+
 	g_printExitMsg("B00\0");
 	return(gSST_MODEMPRENDIENDO_01);
 }
@@ -129,6 +132,7 @@ static int gTR_B01(void)
 {
 	// Prendo el modem HW
 	MODEM_HWpwrOn();
+	SWtryes = SW_TRYES;
 
 	if ( HWtryes > 0 ) {
 		--HWtryes;
@@ -149,6 +153,10 @@ static int gTR_B02(void)
 	MODEM_SWswitchHIGH();
 	vTaskDelay( (portTickType)( 500 / portTICK_RATE_MS ) );
 	MODEM_SWswitchLOW();
+
+	if ( SWtryes > 0 ) {
+		--SWtryes;
+	}
 
 	// Espero 10s que prenda.
 	Ctimer = 10;
@@ -229,8 +237,6 @@ static int gTR_B08(void)
 //------------------------------------------------------------------------------------
 static int gTR_B09(void)
 {
-	SWtryes = SW_TRYES;
-
 	g_printExitMsg("B09\0");
 	return(gSST_MODEMPRENDIENDO_01);
 }

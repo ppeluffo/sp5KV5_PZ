@@ -208,6 +208,9 @@ u08 i;
 	snprintf_P( &gprs_printfBuff[pos],( sizeof(gprs_printfBuff) - pos ),PSTR("\r\n\0" ));
 	u_debugPrint(D_GPRS, gprs_printfBuff, sizeof(gprs_printfBuff) );
 
+	snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("GPRS: Frame INIT enviado.\r\n\0"));
+	u_logPrint(gprs_printfBuff, sizeof(gprs_printfBuff) );
+
 	g_printExitMsg("F02\0");
 	return(gSST_INITFRAME_03);
 }
@@ -293,6 +296,9 @@ u08 saveFlag = 0;
 
 	// Trasmiti el ultimo error de WDG: lo borro
 	wdgStatus.resetCause = 0;
+
+	snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("GPRS: Frame INIT confirmado.\r\n\0"));
+	u_logPrint(gprs_printfBuff, sizeof(gprs_printfBuff) );
 
 	// Si el server me manda que me resetee para borrar las flags de alarma
 	g_GPRSprocessReset();

@@ -225,6 +225,9 @@ static int gTR_C00(void)
 	vTaskDelay( (portTickType)( 100 / portTICK_RATE_MS ) );
 	g_printRxBuffer();
 
+	snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("GPRS: Modem Configurado.\r\n\0"));
+	u_logPrint(gprs_printfBuff, sizeof(gprs_printfBuff) );
+
 	g_printExitMsg("C00\0");
 	return(gSST_CONFIGURAR_01);
 }
@@ -308,6 +311,9 @@ static int gTR_C03(void)
 	FreeRTOS_write( &pdUART0, "AT+CREG?\r\0", sizeof("AT+CREG?\r\0") );
 	vTaskDelay( (portTickType)( 100 / portTICK_RATE_MS ) );
 
+	snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("GPRS: Banda GRPS OK.\r\n\0"));
+	u_logPrint(gprs_printfBuff, sizeof(gprs_printfBuff) );
+
 	g_printExitMsg("C03\0");
 	return(gSST_CONFIGURAR_03);
 }
@@ -388,6 +394,9 @@ static int gTR_C08(void)
 static int gTR_C09(void)
 {
 
+	snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("GPRS: Vinculado a la red gprs.\r\n\0"));
+	u_logPrint(gprs_printfBuff, sizeof(gprs_printfBuff) );
+
 	// Leo el SQE
 	snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("\r\n%s: query SQE:\r\n\0"), u_now());
 	u_debugPrint(D_GPRS, gprs_printfBuff, sizeof(gprs_printfBuff) );
@@ -439,6 +448,8 @@ char *ts = NULL;
 		snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("\r\nCSQ=%d,DBM=%d\r\n\0"),systemVars.csq,systemVars.dbm);
 		u_debugPrint(D_GPRS, gprs_printfBuff, sizeof(gprs_printfBuff) );
 
+		snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("GPRS: Calidad de señal %d db.\r\n\0"),systemVars.dbm );
+		u_logPrint(gprs_printfBuff, sizeof(gprs_printfBuff) );
 	}
 
 	g_printExitMsg("C11\0");
@@ -609,6 +620,9 @@ char c;
 	GPRS_stateVars.state.nextFrame = INIT_FRAME;
 
 	GPRS_stateVars.counters.nroLOTEtryes = MAXTRYESLOTE;
+
+	snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("GPRS: Direccion IP asignada.\r\n\0"));
+	u_logPrint(gprs_printfBuff, sizeof(gprs_printfBuff) );
 
 	g_printExitMsg("C20\0");
 	return( pv_cambiarEstado(gST_CONFIGURAR,gST_STANDBY) );

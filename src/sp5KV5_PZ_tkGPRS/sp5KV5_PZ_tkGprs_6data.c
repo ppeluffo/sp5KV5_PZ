@@ -180,7 +180,9 @@ StatBuffer_t pxFFStatBuffer;
 	// Valores
 	pos += snprintf_P( &gprs_printfBuff[pos],( sizeof(gprs_printfBuff) - pos ),PSTR("%s>%d,"),systemVars.chName[0],Aframe.inputs[0] );
 	pos += snprintf_P( &gprs_printfBuff[pos],( sizeof(gprs_printfBuff) - pos ),PSTR("%s>%d,"),systemVars.chName[1],Aframe.inputs[1] );
-	pos += snprintf_P( &gprs_printfBuff[pos],( sizeof(gprs_printfBuff) - pos ),PSTR("%s>%d"),systemVars.chName[2],Aframe.inputs[2] );
+	pos += snprintf_P( &gprs_printfBuff[pos],( sizeof(gprs_printfBuff) - pos ),PSTR("%s>%d,"),systemVars.chName[2],Aframe.inputs[2] );
+	// Status
+	pos += snprintf_P( &gprs_printfBuff[pos],( sizeof(gprs_printfBuff) - pos ),PSTR("s>%d"),Aframe.status );
 
 	// Trasmito por el modem.
 	FreeRTOS_write( &pdUART0, gprs_printfBuff, pos );
@@ -247,6 +249,9 @@ u16 pos = 0;
 	snprintf_P( &gprs_printfBuff[pos],( sizeof(gprs_printfBuff) - pos ),PSTR("\r\n\0" ));
 	u_debugPrint(D_GPRS, gprs_printfBuff, sizeof(gprs_printfBuff) );
 
+	snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("GPRS: Frame DATA enviado\r\n\0"));
+	u_logPrint(gprs_printfBuff, sizeof(gprs_printfBuff) );
+
 	// Solo espero hasta 10s la respuesta.
 	cTimer = 10;
 	serverResponse = MRSP_NONE;
@@ -298,6 +303,9 @@ StatBuffer_t pxFFStatBuffer;
 	} else {
 		memRcds4Del = FALSE;
 	}
+
+	snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("GPRS: Frame DATA confirmado\r\n\0"));
+	u_logPrint(gprs_printfBuff, sizeof(gprs_printfBuff) );
 
 	g_printExitMsg("G05\0");
 	return(gSST_DATAFRAME_04);

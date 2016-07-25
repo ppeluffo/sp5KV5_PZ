@@ -87,6 +87,9 @@ static int gTR_A00(void)
 	// Apago el modem
 	MODEM_HWpwrOff();
 
+	snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("GPRS: Modem Apagado\r\n\0"));
+	u_logPrint(gprs_printfBuff, sizeof(gprs_printfBuff) );
+
 	g_printExitMsg("A00\0");
 	return(gSST_MODEMAPAGADO_01);
 }
@@ -125,8 +128,6 @@ static void pv_configCTimer(void)
 {
 
 static s08 inicio = TRUE;
-RtcTimeType_t rtcDateTime;
-u16 now;
 
 	// Siempre que accedo al estado modemApagado debo reconfigurar los timers.
 	// Si entre por msgReload, borro la flag y arranco el modem rapido.

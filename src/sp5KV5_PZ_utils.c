@@ -214,7 +214,8 @@ void u_loadDefaults(void)
 	systemVars.roaming = FALSE;
 
 	// DEBUG
-	systemVars.debugLevel = D_BASIC;
+	systemVars.debugLevel = D_NONE;
+	systemVars.log = ON;
 
 	strncpy_P(systemVars.serverAddress, PSTR("192.168.0.9\0"),IP_LENGTH);
 	systemVars.timerPoll = 60;			// Poleo c/5 minutos
@@ -271,7 +272,7 @@ RtcTimeType_t rtcDateTime;
 
 	RTC_read(&rtcDateTime);
 	rtcDateTime.year -= 2000;
-	snprintf_P( nowStr,sizeof(nowStr), PSTR("%02d/%02d/%02d %02d:%02d:%02d\0"),rtcDateTime.day,rtcDateTime.month,rtcDateTime.year,rtcDateTime.hour,rtcDateTime.min,rtcDateTime.sec );
+	snprintf_P( nowStr,sizeof(nowStr), PSTR("%02d/%02d/%02d %02d:%02d:%02d \0"),rtcDateTime.day,rtcDateTime.month,rtcDateTime.year,rtcDateTime.hour,rtcDateTime.min,rtcDateTime.sec );
 	return(nowStr);
 }
 //------------------------------------------------------------------------------------
@@ -283,13 +284,22 @@ void u_debugPrint(u08 debugCode, char *msg, u16 size)
 	}
 }
 //------------------------------------------------------------------------------------
+void u_logPrint(char *msg, u16 size)
+{
+
+	if ( systemVars.log == ON ) {
+		FreeRTOS_write( &pdUART1, u_now(), 20 );
+		FreeRTOS_write( &pdUART1, msg, size );
+	}
+}
+//------------------------------------------------------------------------------------
 void u_reset(void)
 {
 	wdt_enable(WDTO_30MS);
 	while(1) {}
 }
 //------------------------------------------------------------------------------------
-void u_rangeSignal(t_rangeAction action)
+void u_rangeSignal(t_binary action)
 {
 
 	// Genera una senal de prendido/apagado del sensor

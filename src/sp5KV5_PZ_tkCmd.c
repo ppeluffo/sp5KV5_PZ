@@ -24,6 +24,7 @@ void pv_cmdRdDIN(void);
 s08 pv_cmdWrDebugLevel(char *s);
 s08 pv_cmdWrkMode(char *s0, char *s1);
 s08 pv_cmdWrEE(char *s0, char *s1);
+s08 pv_cmdWrLog(char *s);
 static void pv_readMemory(void);
 
 //----------------------------------------------------------------------------------------
@@ -61,6 +62,7 @@ u08 ticks;
 
 	// Espero la notificacion para arrancar
 	vTaskDelay( ( TickType_t)( 500 / portTICK_RATE_MS ) );
+
 	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("starting tkCmd..\r\n\0"));
 	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 
@@ -120,6 +122,8 @@ static void cmdHelpFunction(void)
 	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  timerpoll, dlgid, gsmband\r\n\0"));
 	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  debuglevel +/-{none,basic,mem,data,gprs,all} \r\n\0"));
+	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
+	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  log {on,off} \r\n\0"));
 	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  A{0..2} aname \r\n\0"));
 	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
@@ -350,6 +354,14 @@ StatBuffer_t pxFFStatBuffer;
 	snprintf_P( &cmd_printfBuff[pos],sizeof(cmd_printfBuff),PSTR("\r\n\0"));
 	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 
+	// Log
+	if ( systemVars.log == ON ) {
+		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  log: ON\r\n\0"));
+	} else {
+		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  log: OFF\r\n\0"));
+	}
+	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
+
 	/* CONFIG */
 	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR(">Config:\r\n\0"));
 	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
@@ -556,6 +568,13 @@ u08 argc;
 	/* DEBUGLEVEL */
 	if (!strcmp_P( strupr(argv[1]), PSTR("DEBUGLEVEL\0"))) {
 		retS = pv_cmdWrDebugLevel(argv[2]);
+		retS ? pv_snprintfP_OK() : 	pv_snprintfP_ERR();
+		return;
+	}
+
+	/* DEBUGLEVEL */
+	if (!strcmp_P( strupr(argv[1]), PSTR("LOG\0"))) {
+		retS = pv_cmdWrLog(argv[2]);
 		retS ? pv_snprintfP_OK() : 	pv_snprintfP_ERR();
 		return;
 	}
@@ -824,6 +843,22 @@ s08 pv_cmdWrDebugLevel(char *s)
 	}
 	if ((!strcmp_P( strupr(s), PSTR("ALL")))) {
 		systemVars.debugLevel = D_DATA + D_GPRS + D_MEM  + D_DEBUG;
+		return(TRUE);
+	}
+
+	return(FALSE);
+}
+/*------------------------------------------------------------------------------------*/
+s08 pv_cmdWrLog(char *s)
+{
+
+	if ((!strcmp_P( strupr(s), PSTR("ON")))) {
+		systemVars.log = ON;
+		return(TRUE);
+	}
+
+	if ((!strcmp_P( strupr(s), PSTR("OFF")))) {
+		systemVars.log = OFF;
 		return(TRUE);
 	}
 

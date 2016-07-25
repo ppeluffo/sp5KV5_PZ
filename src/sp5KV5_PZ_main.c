@@ -21,6 +21,11 @@
  * 9- Los canales se llaman chName y no mas aChName.
  * 10- No tengo senal de bateria ( ademas funciona con 220V) por lo que elimino todo lo referente
  *    a batt.
+ * 11- La funcion de medir se llama ping()
+ *     Si mido mas de 5mts retorno 500
+ *     Si al medir tengo error, repito hasta 10 veces la medida espaciada 2s
+ *     Si al final igual tengo error, mantengo la medida anterior y marco una flag de error en la trasmision.
+ * 12- Defino una funcion logprint para mejorar el entendimiento de los mensajes.
  *
  *
   *#################################################################################################
